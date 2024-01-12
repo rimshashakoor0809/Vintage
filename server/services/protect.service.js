@@ -35,7 +35,33 @@ class service {
     }
   }
 
+  async verifySeller(req, res, next) {
+    const accessToken = req.cookies.seller_access_token;
+    const refreshToken = req.cookies.seller_refresh_token;
 
+    if (!accessToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized Seller. No token found.",
+        data: null
+      });
+    }
+
+    try {
+      const decoded = await verifyAccessToken(accessToken)
+      console.log("Decoded Seller Data:", decoded);
+      req.seller = decoded;
+      return next();
+    } catch (err) {
+      log.info(err, "Seller: Error in verification:")
+
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token",
+        data: null
+      });
+    }
+  }
 
 }
 

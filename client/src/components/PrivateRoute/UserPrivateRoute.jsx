@@ -2,7 +2,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-export const PrivateRoute = () => {
+export const UserPrivateRoute = () => {
   const { loading, isAuthenticated } = useSelector((state) => state.user);
 
   if (loading === false) {

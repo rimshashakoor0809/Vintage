@@ -1,29 +1,49 @@
 import { useState } from "react";
 import Dashboard from "../../pages/Dashboard"
 import { categoriesData } from "../../static/data";
+import { createProductAction } from "../../redux/actions/product";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+
 
 const CreateProduct = () => {
-    const [images, setImages] = useState([]);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
-  const [price, setPrice] = useState(0.0);
-  const [quantity, setQuantity] = useState(0);
+  
   return (
     <Dashboard>
       <div className="mx-5 w-auto">
-  
+
         {/* Header */}
 
         <div>
-        <h3 className="text-[#565656] text-xl mt-2">Create Product</h3>
-        <div className="border-t-2 border-vintage-neutral my-4"></div>
-      </div>
+          <h3 className="text-[#565656] text-xl mt-2">Create Product</h3>
+          <div className="border-t-2 border-vintage-neutral my-4"></div>
+        </div>
 
-        <div className="flex flex-row justify-evenly  flex-wrap sm:flex-wrap md:flex-nowrap lg:flex-nowrap">
+       
+        <div className="flex flex-row justify-evenly my-14 flex-wrap sm:flex-wrap md:flex-nowrap lg:flex-nowrap">
 
+        {/* Image */}
+            <div className="flex flex-col gap-5 justify-start items-center w-full sm:w-full  md:w-1/3 lg:w-1/3 ">
+              <img
+                // src={`${user?.avatar?.url}`}
+                className="p-14 rounded-full object-cover border-[3px] border-vintage-primary"
+                alt=""
+              />
+              <div>
+                <input
+                  type="file"
+                  id="image"
+                  className="hidden"
+                  // onChange={handleImage}
+            />
+            <label htmlFor="image" className="bg-vintage-neutral rounded-md p-2">
+              Upload File
+            </label>
+              </div>
+          </div>
         {/* Form */}
-        <div className="w-full ">
+        <div className="w-full py-5 md:px-5 md:py-0 sm:py-0">
           <form className="space-y-6">
             {/* Full Name */}
             <div>
@@ -31,11 +51,11 @@ const CreateProduct = () => {
                 htmlFor="name"
                 className="block text-base font-medium text-vintage-black"
               >
-                Product Name
+                Full Name
               </label>
               <div className="mt-1">
                 <input
-                  type="text"
+                  type="name"
                   name="name"
                   autoComplete="name"
                   required
@@ -44,104 +64,50 @@ const CreateProduct = () => {
                   className="appearance-none block w-full px-3 py-2 border border-vintage-black rounded-md focus:shadow focus:shadow-orange-200 placeholder-vintage-neutral focus:outline-none focus:ring-vintage-primary focus:border-vintage-primary sm:text-sm"
                 />
               </div>
-              </div>
-              
-            {/* Description*/}
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-base font-medium text-vintage-black"
-              >
-                Description
-              </label>
-              <div className="mt-1">
-              
-                   <textarea
-            cols="30"
-            required
-            rows="8"
-            type="text"
-            name="description"
-            value={description}
-            className="appearance-none block w-full px-3 py-2 border border-vintage-black rounded-md focus:shadow focus:shadow-orange-200 placeholder-vintage-neutral focus:outline-none focus:ring-vintage-primary focus:border-vintage-primary sm:text-sm"
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Enter your product description..."
-          ></textarea>
-              </div>
             </div>
       
-          
+            {/* Email */}
+
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-base font-medium text-vintage-black"
+              >
+                Email address
+              </label>
+              <div className="mt-1">
+                <input
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-vintage-black rounded-md focus:shadow focus:shadow-orange-200 placeholder-vintage-neutral focus:outline-none focus:ring-vintage-primary focus:border-vintage-primary sm:text-sm"
+                />
+              </div>
+            </div>
             {/* Phone Number */}
 
             <div>
               <label
-                htmlFor="price"
+                htmlFor="email"
                 className="block text-base font-medium text-vintage-black"
               >
-                Price
+                Phone Number
               </label>
               <div className="mt-1">
                 <input
                   type="number"
-                  name="price"
-                  autoComplete="price"
+                  name="phoneNumber"
+                  autoComplete="phoneNumber"
                   required
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 border border-vintage-black rounded-md focus:shadow focus:shadow-orange-200 placeholder-vintage-neutral focus:outline-none focus:ring-vintage-primary focus:border-vintage-primary sm:text-sm"
                 />
               </div>
-              </div>
-              
-
-              {/* Phone Number */}
-
-            <div>
-              <label
-                htmlFor="category"
-                className="block text-base font-medium text-vintage-black"
-              >
-                Category
-              </label>
-              <div className="mt-1">
-                <select
-            className="appearance-none block w-full px-3 py-2 border border-vintage-black rounded-md focus:shadow focus:shadow-orange-200 placeholder-vintage-neutral focus:outline-none focus:ring-vintage-primary focus:border-vintage-primary sm:text-sm"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option value="Choose a category">Choose a category</option>
-            {categoriesData &&
-              categoriesData.map((i) => (
-                <option value={i.title} key={i.title}>
-                  {i.title}
-                </option>
-              ))}
-          </select>
-              </div>
-              </div>
-              
-
-              {/* Phone Number */}
-
-            <div>
-              <label
-                htmlFor="quantity"
-                className="block text-base font-medium text-vintage-black"
-              >
-                Quantity
-              </label>
-              <div className="mt-1">
-                <input
-                  type="number"
-                  name="quantity"
-                  autoComplete="quantity"
-                  required
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-vintage-black rounded-md focus:shadow focus:shadow-orange-200 placeholder-vintage-neutral focus:outline-none focus:ring-vintage-primary focus:border-vintage-primary sm:text-sm"
-                />
-              </div>
-              </div>
+            </div>
 
             <div>
               <button
@@ -154,9 +120,9 @@ const CreateProduct = () => {
           </form>
           </div>
         </div>
-        
-  
-    </div>
+
+
+      </div>
     </Dashboard>
   )
 }

@@ -4,6 +4,9 @@ const log = require("../../logger");
 const joi = require("joi");
 const { generateAccessToken, generateRefreshToken } = require("../../services/jwt.service");
 const ErrorHandler = require("../../utils/ErrorHandler");
+const sendEmail = require("../../utils/sendEmail");
+const User = require("../../models/User");
+const Seller = require("../../models/Seller");
 class Controller {
 
   constructor() {
@@ -71,13 +74,11 @@ class Controller {
   }
 
   async registerSeller(req, res, next) {
-    const { name, email, password } = req.body;
+    const { name, email, password, phoneNumber, zipCode, address } = req.body;
     try {
-      await this.validateRegistrationSeller({ name, email, password });
+      await this.validateRegistrationSeller({ name, email, password, phoneNumber });
       const filename = req?.file?.filename;
-      console.log("Filename:", filename);
       const fileUrl = path.join(filename);
-      console.log("FileUrl:", fileUrl);
       const payload = { ...req.body, fileUrl };
       log.info(req.body, "Register Payload");
       const user = await registerSeller(payload);
@@ -105,8 +106,9 @@ class Controller {
         email: user.email,
         role: user.role,
         avatar: user.avatar,
-        address: user.addresses,
-        phoneNumber: user.phoneNumber
+        address: user.address,
+        phoneNumber: user.phoneNumber,
+        zipCode: user.zipCode
       }
       console.log("Login User:", payload);
 
@@ -138,6 +140,7 @@ class Controller {
     })
     await schema.validateAsync(data);
   }
+
   async validateRegistrationSeller(data) {
     const schema = joi.object().keys({
       name: joi.string().required(),
@@ -145,10 +148,10 @@ class Controller {
         .email({ tlds: { allow: false } })
         .required(),
       password: joi.string().required(),
+      phoneNumber: joi.string().required(),
     })
     await schema.validateAsync(data);
   }
-
 
   async validateLogin(data) {
     const schema = joi.object().keys({
@@ -157,6 +160,265 @@ class Controller {
     });
 
     await schema.validateAsync(data);
+  }
+
+  async forgotPassword(req, res, next) {
+    try {
+      const { email } = req.body;
+      console.log("Email:", email);
+
+      const user = await User.findOne({ email });
+      if (!user) {
+        res.status(400).json({
+          success: false,
+          message: "user not found.",
+        })
+      }
+      // construct reset url/link
+      const resetUrl = `${process.env.FRONTEND_URL}reset-password/${user?.id}`;
+      console.log("Reset url:", resetUrl)
+
+      // send Email
+      const subject = "Vintage Password Reset"
+      const to = user.email
+      const from = process.env.EMAIL_USER
+      const replyTo = "no-reply@vintage.com"
+      const template = "forgotPassword"
+      const name = user.name
+      const link = resetUrl
+      const data = { name, link };
+
+      await sendEmail(subject, to, from, replyTo, template, data);
+      res.status(200).json({
+        success: true,
+        message: "Reset password email sent successfully"
+      });
+    } catch (error) {
+      log.error(error, "Error forgetting password:");
+      ErrorHandler(res, error);
+    }
+  }
+
+  async resetPassword(req, res, next) {
+    try {
+      const { token } = req.params;
+      const { password } = req.body;
+      console.log("token: ", token);
+      console.log("password:", password);
+      const user = await User.findById(token)
+      console.log("User Token in Reset:", user)
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "No user found.",
+          data: null
+        })
+      }
+
+      user.password = password;
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: "Password Reset Successfully. Please login to your account"
+      });
+    } catch (error) {
+      log.error(error, "Error resetting password:");
+      ErrorHandler(res, error);
+    }
+  }
+
+  async changePassword(req, res, next) {
+    try {
+      const { oldPassword, newPassword } = req.body;
+      const user = req.user;
+      if (!oldPassword && !newPassword) {
+        return res.status(404).json({
+          success: false,
+          message: "Please provide both confirm and new password",
+          data: null
+        })
+      }
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "No token found.",
+          data: null
+        })
+      }
+
+      const userDetails = await User.findById(user?.id);
+      if (!userDetails) {
+        return res.status(404).json({
+          success: false,
+          message: "No user found.",
+          data: null
+        })
+      }
+
+      // check if current password matches with the existing one.
+      const isPasswordCorrect = await bcrypt.compare(payload.oldPassword, userDetails.password);
+      if (!isPasswordCorrect) {
+        return res.status(404).json({
+          success: false,
+          message: "old password does not match.",
+          data: null
+        })
+      }
+      
+      // Reset the password
+      userDetails.password = newPassword;
+      await userDetails.save()
+      this.clearCookiesData(res, "user");
+
+      // send Email
+
+      const subject = "Password Changed Successfully"
+      const to = user.email
+      const from = process.env.EMAIL_USER
+      const replyTo = "no-reply@vintage.com"
+      const template = "changePassword"
+      const data = { name: req.user.name };
+
+      await sendEmail(subject, to, from, replyTo, template, data);
+
+      res.status(200).json({
+        success: true,
+        message: "Password changed Successfully. Please login to your account."
+      });
+    } catch (error) {
+      ErrorHandler(res, error);
+    }
+  }
+
+  async sellerForgotPassword(req, res, next) {
+    try {
+      const { email } = req.body;
+
+      const user = await Seller.findOne({ email });
+      if (!user) {
+        res.status(400).json({
+          success: false,
+          message: "seller not found.",
+        })
+      }
+      // construct reset url/link
+      const resetUrl = `${process.env.FRONTEND_URL}auth/seller/reset-password/${user?.id}`;
+      console.log("Reset url:", resetUrl)
+
+      // send Email
+      const subject = "Vintage Password Reset"
+      const to = user.email
+      const from = process.env.EMAIL_USER
+      const replyTo = "no-reply@vintage.com"
+      const template = "forgotPassword"
+      const name = user.name
+      const link = resetUrl
+      const data = { name, link };
+
+      await sendEmail(subject, to, from, replyTo, template, data);
+      res.status(200).json({
+        success: true,
+        message: "Reset password email sent successfully"
+      });
+    } catch (error) {
+      log.error(error, "Error forgetting password (seller):");
+      ErrorHandler(res, error);
+    }
+  }
+
+  async sellerResetPassword(req, res, next) {
+    try {
+      const { token } = req.params;
+      const { password } = req.body;
+      const user = await Seller.findById(token)
+      console.log("User Token in Reset:", user)
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "No seller found.",
+          data: null
+        })
+      }
+
+      // Reset the password
+      user.password = password;
+
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: "Password Reset Successfully. Please login to your account"
+      });
+    } catch (error) {
+      log.error(error, "Error forgetting password:");
+      ErrorHandler(res, error);
+    }
+  }
+
+  async sellerChangePassword(req, res, next) {
+    try {
+      const { oldPassword, newPassword } = req.body;
+      const user = req.seller;
+      if (!oldPassword && !newPassword) {
+        return res.status(404).json({
+          success: false,
+          message: "Please provide both confirm and new password",
+          data: null
+        })
+      }
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "No token found.",
+          data: null
+        })
+      }
+
+      const userDetails = await Seller.findById(user?.id);
+      if (!userDetails) {
+        return res.status(404).json({
+          success: false,
+          message: "No user found.",
+          data: null
+        })
+      }
+
+      // check if current password matches with the existing one.
+      const isPasswordCorrect = await bcrypt.compare(payload.oldPassword, userDetails.password);
+      if (!isPasswordCorrect) {
+        return res.status(404).json({
+          success: false,
+          message: "old password does not match.",
+          data: null
+        })
+      }
+
+      // Reset the password
+      userDetails.password = newPassword;
+      await userDetails.save()
+      this.clearCookiesData(res, "seller");
+
+      // send Email
+
+      const subject = "Password Changed Successfully"
+      const to = user.email
+      const from = process.env.EMAIL_USER
+      const replyTo = "no-reply@vintage.com"
+      const template = "changePassword"
+      const data = { name: req.user.name };
+
+      await sendEmail(subject, to, from, replyTo, template, data);
+
+      res.status(200).json({
+        success: true,
+        message: "Password changed Successfully. Please login to your account."
+      });
+    } catch (error) {
+      ErrorHandler(res, error);
+    }
   }
 
   setCookies(res, role, accessToken, refreshToken) {

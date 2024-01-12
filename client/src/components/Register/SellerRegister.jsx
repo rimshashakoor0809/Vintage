@@ -44,16 +44,17 @@ const SellerRegister = () => {
       toast.error("Password does not match")
       return;
     }
-    console.log("File:", avatar)
     const form = new FormData();
     form.append("name", name)
     form.append("email", email)
     form.append("password", password)
     form.append("file", avatar)
-    console.log("Form:", form)
+    form.append("phoneNumber", phoneNo)
+    form.append("address", address)
+    form.append("zipCode", code)
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/auth/user/register`, form,
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/auth/seller/register`, form,
         { headers: { "Content-Type": "multipart/form-data" } });
       console.log("Response:", response);
       const { data } = response;

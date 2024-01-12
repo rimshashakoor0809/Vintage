@@ -28,18 +28,12 @@ const userSchema = new mongoose.Schema({
       city: {
         type: String,
       },
-      address1: {
-        type: String,
-      },
-      address2: {
+      address: {
         type: String,
       },
       zipCode: {
         type: Number,
-      },
-      addressType: {
-        type: String,
-      },
+      }
     }
   ],
   role: {

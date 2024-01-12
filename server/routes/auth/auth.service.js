@@ -1,3 +1,4 @@
+const Seller = require("../../models/Seller");
 const User = require("../../models/User");
 
 class Service {
@@ -42,38 +43,41 @@ class Service {
   }
 
   async registerSeller(payload) {
-    const { name, email, password, fileUrl } = payload;
-    const userExists = await User.findOne({ email });
-    if (userExists) {
+    const { name, email, password, phoneNumber, address, zipCode, fileUrl } = payload;
+    const sellerExists = await Seller.findOne({ email });
+    if (sellerExists) {
       throw new Error("user already exists.")
     }
-    const user = await User.create({
+    const seller = await Seller.create({
       name,
       email,
       password,
+      zipCode,
+      address,
+      phoneNumber,
       avatar: fileUrl
     });
 
-    if (!user) {
-      throw new Error("Failed to register new user.")
+    if (!seller) {
+      throw new Error("Failed to register new seller.")
     }
 
-    return user;
+    return seller;
   }
 
   async loginSeller(payload) {
     const { email, password } = payload;
-    const user = await User.findOne({ email }).select("+password");
-    if (!user) {
-      throw new Error("User not found")
+    const seller = await Seller.findOne({ email }).select("+password");
+    if (!seller) {
+      throw new Error("Seller not found")
     }
 
-    const validPassword = await user.comparePassword(password);
+    const validPassword = await seller.comparePassword(password);
     if (!validPassword) {
       throw new Error("Please provide correct password.")
     }
-    console.log("user:", user);
-    return user;
+    console.log("seller:", seller);
+    return seller;
   }
 }
 

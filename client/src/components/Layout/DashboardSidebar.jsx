@@ -9,28 +9,34 @@ const items = [
   {
     title: "Dashboard",
     icon: <RxPerson size={20} className="text-vintage-primary font-bold" />,
-    path: "/seller/statistics"
+    path: "/seller/dashboard"
+
+  },
+  {
+    title: "Profile",
+    icon: <RxPerson size={20} className="text-vintage-primary font-bold" />,
+    path: "/seller/profile"
 
   },
   {
     title: "Orders",
     icon: <HiOutlineShoppingBag size={20} className="text-vintage-primary font-bold hover:text-vintage-dark" />,
-    path: "/all-orders"
+    path: "/seller/all-orders"
   },
   {
     title: "Products",
     icon: <TbAddressBook size={20} className="text-vintage-primary font-bold hover:text-vintage-dark" />,
-    path: "/all-products"
+    path: "/seller/all-products"
   },
   {
     title: "Create Product",
     icon: <TbAddressBook size={20} className="text-vintage-primary font-bold hover:text-vintage-dark" />,
-    path: "/create-product"
+    path: "/seller/create-product"
   },
   {
     title: "Change Password",
     icon: <RiLockPasswordLine size={20} className="text-vintage-primary font-bold hover:text-vintage-dark" />,
-    path: "/change-password"
+    path: "/seller/change-password"
   },
   {
     title: "Log out",

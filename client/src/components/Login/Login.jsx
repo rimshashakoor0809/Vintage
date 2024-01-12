@@ -1,10 +1,9 @@
 import axios from 'axios';
 import  { useState } from 'react'
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 const Login = () => {
-  const navigate = useNavigate();
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
@@ -21,8 +20,8 @@ const Login = () => {
         toast.error("Failed to login the user");
         return;
       }
-      // toast.success(`${data?.message}`)
-      navigate("/profile")
+      toast.success(`${data?.message}`)
+      window.location.reload();
     } catch (error) {
       console.log("Error in Login:", error.response.data);
       toast.error(`${error.response.data.message}`)

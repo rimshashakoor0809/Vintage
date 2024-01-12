@@ -1,18 +1,18 @@
 import axios from 'axios';
 import  { useState } from 'react'
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 const SellerLogin = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
 
   const submitHandler = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/auth/user/login`,
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_BASE_URL}/auth/seller/login`,
         { email, password });
       console.log("Response:", response);
       const { data } = response;
@@ -20,9 +20,8 @@ const SellerLogin = () => {
         toast.error("Failed to login the user");
         return;
       }
-      toast.success(`${data?.message}`)
-      setEmail("")
-      setPassword("")
+      toast.success(`${data?.message}`);
+      navigate("/seller/dashboard")
     } catch (error) {
       console.log("Error in Login:", error.response.data);
       toast.error(`${error.response.data.message}`)

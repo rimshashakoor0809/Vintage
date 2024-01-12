@@ -11,6 +11,8 @@ const log = require("./logger");
 
 const authRoute = require("./routes/auth/index");
 const userRoute = require("./routes/user/index");
+const sellerRoute = require("./routes/seller/index");
+const productRoute = require("./routes/product/index")
 
 const port = process.env.PORT || 1122;
 const app = express();
@@ -33,6 +35,9 @@ app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 
 app.use("/api/auth", authRoute);
 app.use("/api/user", userRoute);
+app.use("/api/seller", sellerRoute);
+app.use("/api/product", productRoute);
+
 
 // global error handler
 app.use((err, req, res, next) => {

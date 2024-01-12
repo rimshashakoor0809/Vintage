@@ -3,7 +3,6 @@ import {  AiOutlineSearch, AiOutlineShoppingCart } from "react-icons/ai"
 import { CgProfile } from "react-icons/cg";
 import { IoMenu } from "react-icons/io5";
 import { Link } from "react-router-dom"
-import { productData } from "../../static/data"
 import Navbar from "./Navbar"
 import { RxCross1 } from "react-icons/rx";
 import Cart from "../Cart/Cart";
@@ -11,7 +10,9 @@ import { useSelector } from "react-redux";
 
 const Header = ({ activeHeading }) => {
 
-    const { isAuthenticated } = useSelector((state) => state.user);
+  const { isAuthenticated } = useSelector((state) => state.user);
+  const { allProducts} = useSelector((state) => state.products); 
+  const { cart} = useSelector((state) => state.cart); 
   const [search , setSearch] = useState("")
   const [searchData, setSearchData] = useState(null);
   const [seller, setSeller] = useState(false);
@@ -20,13 +21,14 @@ const Header = ({ activeHeading }) => {
   const [openCart, setOpenCart] = useState(false);
 
 
+  console.log("check all:", allProducts)
    const handleSearchChange = (e) => {
     const term = e.target.value;
     setSearch(term);
 
     const filteredProducts =
-      productData &&
-       productData.filter((product) =>
+      allProducts &&
+       allProducts?.filter((product) =>
         product.name.toLowerCase().includes(term.toLowerCase())
        );
      console.log("Filtered Products:", filteredProducts)
@@ -68,17 +70,17 @@ const Header = ({ activeHeading }) => {
               className="absolute right-2 top-2 cursor-pointer text-vintage-neutral"
           />
           
-          {searchData && searchData.length !== 0 ? (
-              <div className="absolute min-h-[30vh] bg-gray-50 shadow-sm-2 z-[9] p-4 rounded-lg">
+          {searchData && searchData?.length !== 0 ? (
+              <div className="w-full absolute min-h-[30vh] bg-gray-50 shadow-sm-2 z-[9] p-4 rounded-lg">
                 {searchData &&
-                searchData.map((i, index) => {
+                searchData?.map((i, index) => {
                   const data = i.name;
                   const productName = data.replace(/\s+/g, "-")
                     return (
                       <Link to={`/product/${productName}`} key={index} >
                         <div className="w-full flex items-start-py-3">
                           <img
-                            src={`${i.image_Url[0]?.url}`}
+                            src={``}
                             alt=""
                             className="w-[40px] h-[40px] mr-[10px]"
                           />
@@ -131,7 +133,7 @@ const Header = ({ activeHeading }) => {
                   color="#fff"
                 />
                 <span className="absolute right-0 top-0 rounded-full bg-red-400 w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px] leading-tight text-center">
-                  {/* {cart && cart.length} */} 0
+                  {cart && cart.length || 0} 
                 </span>
               </div>
             </div>
@@ -190,7 +192,7 @@ const Header = ({ activeHeading }) => {
             >
               <AiOutlineShoppingCart size={30} className="text-vintage-white"/>
               <span className="absolute right-0 top-0 rounded-full bg-red-400 w-4 h-4 top right p-0 m-0 text-white font-mono text-[12px]  leading-tight text-center">
-                {/* {cart && cart.length} */} 0
+                {cart && cart.length || 0} 
               </span>
             </div>
           </div>
